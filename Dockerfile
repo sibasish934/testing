@@ -43,3 +43,37 @@ WORKDIR /app
 COPY --from=builder /app ./
 EXPOSE 3000
 CMD ["node", "index.js"]
+
+
+# Dockerfile with environment variable for node.js application. 
+FROM node:22-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+
+FROM node:22-alpine
+WORKDIR /app
+ENV NODE_ENV="production"
+COPY --from=builder /app ./
+EXPOSE 3000
+CMD ["node", "index.js"]
+
+# Dockerfile with build arguments for node.js application.
+
+FROM node:22-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+
+FROM node:22-alpine
+WORKDIR /app
+ARG NODE_ENV
+ENV NODE_ENV=${NODE_ENV}
+COPY --from=builder /app ./
+EXPOSE 3000
+CMD ["node", "index.js"]
+
+# command to build the Docker image with build arguments
+# docker build --build-arg NODE_ENV=production -t my-node-app .
